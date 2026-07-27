@@ -2,505 +2,475 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Fire Slasher — Official Trailer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web-Slinger AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; user-select:none; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Consolas','Courier New',monospace; color:#fff; }
+  :root{
+    --navy: #0a0e1a;
+    --navy-2: #10182b;
+    --red: #e0262c;
+    --red-dim: #7a1418;
+    --blue: #1f5fae;
+    --blue-bright: #4f9dff;
+    --web: #e8ecf5;
+    --gold: #ffc84a;
+    --line: rgba(232,236,245,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(224,38,44,0.18), transparent 60%),
+      radial-gradient(ellipse 900px 600px at 110% 10%, rgba(31,95,174,0.22), transparent 60%),
+      var(--navy);
+    color:var(--web);
+    font-family:'Inter', sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* faint web lines in the corners — signature element */
+  .web-corner{
+    position:fixed; width:520px; height:520px; pointer-events:none; opacity:0.16; z-index:0;
+  }
+  .web-corner.tl{ top:-160px; left:-160px; }
+  .web-corner.br{ bottom:-200px; right:-200px; transform:rotate(180deg); }
 
-  #trailerCanvas { position:absolute; top:0; left:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
+  .shell{
+    width:100%;
+    max-width:640px;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    padding:0 16px;
+  }
 
-  .letterbox { position:absolute; left:0; width:100%; height:0; background:#000; z-index:5; transition:height 1.2s ease; }
-  #letterTop { top:0; }
-  #letterBottom { bottom:0; }
-  .lettered #letterTop, .lettered #letterBottom { height:9%; }
+  header{
+    padding:22px 4px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid var(--line);
+  }
+  .mask{
+    width:42px;height:42px;border-radius:50%;
+    background: conic-gradient(from 200deg, var(--red), var(--red-dim), var(--blue), var(--blue-bright), var(--red));
+    flex-shrink:0;
+    position:relative;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.06), 0 0 22px rgba(224,38,44,0.35);
+  }
+  .mask::after{
+    content:"";
+    position:absolute; inset:9px;
+    background:var(--navy);
+    border-radius:50%;
+    clip-path: polygon(50% 15%, 62% 40%, 88% 40%, 68% 58%, 76% 84%, 50% 68%, 24% 84%, 32% 58%, 12% 40%, 38% 40%);
+  }
+  header h1{
+    font-family:'Bangers', cursive;
+    letter-spacing:1.5px;
+    font-size:26px;
+    margin:0;
+    color:var(--web);
+    text-shadow: 2px 2px 0 var(--red-dim);
+  }
+  header p{
+    margin:2px 0 0;
+    font-size:12.5px;
+    color:#9aa4bd;
+  }
+  .status-dot{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:11.5px;
+    color:#9aa4bd;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .status-dot span.led{
+    width:8px;height:8px;border-radius:50%;
+    background:#3ddc73;
+    box-shadow:0 0 8px #3ddc73;
+  }
 
-  #textLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:6; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; padding:0 8%; }
-  .cue { position:absolute; opacity:0; transform:translateY(16px) scale(0.98); transition:opacity 1s ease, transform 1.2s ease; width:100%; left:0; text-align:center; }
-  .cue.show { opacity:1; transform:translateY(0) scale(1); }
-  .cue.title { font-size:1.15em; letter-spacing:2px; color:#ffcc99; font-style:italic; text-shadow:0 0 12px rgba(255,120,0,0.6); }
-  .cue.logo { font-size:3.4em; font-weight:900; letter-spacing:4px; text-transform:uppercase; font-family:'Impact','Arial Black',sans-serif;
-    background:linear-gradient(180deg,#fff59d 0%,#ffb300 25%,#ff6d00 55%,#d50000 80%,#4a0000 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 18px #ff3d00); }
-  .cue.tagline { font-size:0.9em; letter-spacing:6px; color:#ffab91; margin-top:10px; }
-  .cue.big { font-size:1.6em; font-weight:900; letter-spacing:2px; color:#ffe082; text-shadow:0 0 14px rgba(255,140,0,0.8); text-transform:uppercase; }
-  .cue.small { font-size:1.05em; letter-spacing:1.5px; color:#ffcc99; text-shadow:0 0 8px rgba(0,0,0,0.9); }
-  .cue.word { font-size:2.6em; font-weight:900; letter-spacing:3px; color:#fff; text-shadow:0 0 20px rgba(255,120,0,0.9); text-transform:uppercase; }
-  .cue.cta { font-size:1.5em; font-weight:800; letter-spacing:2px; color:#ffd54f; text-shadow:0 0 14px rgba(255,180,0,0.8); }
-  .cue.credit { font-size:0.75em; letter-spacing:2px; color:#ffab91; opacity:0.85; }
+  #thread{
+    flex:1;
+    overflow-y:auto;
+    padding:20px 4px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  #thread::-webkit-scrollbar{ width:6px; }
+  #thread::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
 
-  #startScreen, #endScreen { position:absolute; top:0; left:0; width:100%; height:100%; z-index:20; background:radial-gradient(ellipse at center,#2a0800 0%,#000 100%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; padding:0 8%; }
-  #endScreen { display:none; }
-  .trailerLogo { font-size:2.6em; font-weight:900; letter-spacing:3px; text-transform:uppercase; font-family:'Impact','Arial Black',sans-serif;
-    background:linear-gradient(180deg,#fff59d 0%,#ffb300 25%,#ff6d00 55%,#d50000 80%,#4a0000 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 14px #ff3d00); }
-  .subLabel { letter-spacing:4px; color:#ffab91; font-size:0.8em; }
-  button { cursor:pointer; border:none; border-radius:6px; font-weight:700; letter-spacing:1.5px; font-family:inherit; transition:transform 0.1s; }
-  button:active { transform:scale(0.95); }
-  .btn-fire { background:linear-gradient(180deg,#ffab00,#e65100); color:#1a0a00; padding:15px 34px; font-size:1.05em; box-shadow:0 4px 0 #7a2c00, 0 0 24px rgba(255,110,0,0.55); }
-  .btn-dark { background:#2a1a12; color:#ffab91; border:1px solid #ff6d00; padding:10px 22px; font-size:0.8em; }
+  .row{ display:flex; gap:10px; max-width:100%; }
+  .row.user{ justify-content:flex-end; }
+  .bubble{
+    padding:11px 15px;
+    border-radius:14px;
+    font-size:14.5px;
+    line-height:1.5;
+    max-width:82%;
+    white-space:pre-wrap;
+  }
+  .row.user .bubble{
+    background:linear-gradient(135deg, var(--blue), #17407a);
+    border-bottom-right-radius:3px;
+  }
+  .row.ai .bubble{
+    background:var(--navy-2);
+    border:1px solid var(--line);
+    border-bottom-left-radius:3px;
+  }
+  .avatar{
+    width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:2px;
+    background: conic-gradient(from 200deg, var(--red), var(--red-dim), var(--blue), var(--blue-bright), var(--red));
+  }
+  .ai-label{
+    font-family:'Bangers', cursive;
+    font-size:12px;
+    letter-spacing:1px;
+    color:var(--gold);
+    margin-bottom:4px;
+    display:block;
+  }
+  .typing{
+    display:flex; gap:4px; padding:4px 2px;
+  }
+  .typing i{
+    width:6px;height:6px;border-radius:50%;background:var(--gold);
+    animation: bounce 1.1s infinite ease-in-out;
+  }
+  .typing i:nth-child(2){ animation-delay:0.15s; }
+  .typing i:nth-child(3){ animation-delay:0.3s; }
+  @keyframes bounce{ 0%,60%,100%{ transform:translateY(0); opacity:0.5;} 30%{ transform:translateY(-5px); opacity:1;} }
 
-  #muteBtn { position:absolute; top:16px; right:16px; z-index:25; width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,171,0,0.6); color:#ffab00; font-size:1.1em; display:none; }
-  #skipBtn { position:absolute; top:16px; left:16px; z-index:25; padding:8px 14px; font-size:0.7em; background:rgba(0,0,0,0.5); border:1px solid rgba(255,171,0,0.5); color:#ffab91; display:none; }
+  form{
+    display:flex;
+    gap:8px;
+    padding:14px 4px 20px;
+    border-top:1px solid var(--line);
+    align-items:flex-end;
+  }
+  #speakToggle{
+    display:flex; align-items:center; gap:6px;
+    font-size:11.5px; color:#9aa4bd;
+    padding:0 2px 8px;
+    cursor:pointer;
+    user-select:none;
+  }
+  #speakToggle input{ accent-color: var(--red); }
 
-  #progressBar { position:absolute; bottom:9%; left:0; width:100%; height:3px; background:rgba(255,255,255,0.12); z-index:8; display:none; }
-  #progressFill { height:100%; width:0%; background:linear-gradient(90deg,#ffd740,#ff3d00); }
+  textarea{
+    flex:1;
+    resize:none;
+    background:var(--navy-2);
+    border:1px solid var(--line);
+    color:var(--web);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:14.5px;
+    font-family:'Inter', sans-serif;
+    max-height:120px;
+    outline:none;
+  }
+  textarea:focus{ border-color: var(--blue-bright); }
+
+  button{
+    border:none;
+    cursor:pointer;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  #micBtn{
+    width:46px;height:46px;
+    background:var(--navy-2);
+    border:1px solid var(--line);
+    color:var(--web);
+  }
+  #micBtn.listening{
+    background: radial-gradient(circle, var(--red), var(--red-dim));
+    box-shadow: 0 0 0 6px rgba(224,38,44,0.18);
+    animation: pulse 1.3s infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(224,38,44,0.35); }
+    70%{ box-shadow:0 0 0 12px rgba(224,38,44,0); }
+    100%{ box-shadow:0 0 0 0 rgba(224,38,44,0); }
+  }
+  #sendBtn{
+    width:46px;height:46px;
+    background:linear-gradient(135deg, var(--red), var(--red-dim));
+    color:white;
+  }
+  #sendBtn:disabled{ opacity:0.45; cursor:default; }
+
+  .hint{
+    text-align:center;
+    font-size:11px;
+    color:#5c6580;
+    padding-bottom:6px;
+  }
 </style>
 </head>
 <body>
 
-<canvas id="trailerCanvas"></canvas>
-<div class="letterbox" id="letterTop"></div>
-<div class="letterbox" id="letterBottom"></div>
-<div id="textLayer"></div>
-<div id="progressBar"><div id="progressFill"></div></div>
-<button id="muteBtn" onclick="toggleMute()">🔊</button>
-<button id="skipBtn" onclick="endTrailer()">Skip ⏭</button>
+<svg class="web-corner tl" viewBox="0 0 200 200"><g stroke="white" stroke-width="1" fill="none">
+  <path d="M0,0 L200,200 M0,40 L160,200 M0,80 L120,200 M0,120 L80,200 M0,160 L40,200 M40,0 L200,160 M80,0 L200,120 M120,0 L200,80 M160,0 L200,40"/>
+  <path d="M0,0 Q100,10 200,0 M0,0 Q10,100 0,200 M20,20 Q100,40 180,20 M20,20 Q40,100 20,180 M50,50 Q100,65 150,50 M50,50 Q65,100 50,150 M85,85 Q100,90 115,85 M85,85 Q90,100 85,115"/>
+</g></svg>
+<svg class="web-corner br" viewBox="0 0 200 200"><g stroke="white" stroke-width="1" fill="none">
+  <path d="M0,0 L200,200 M0,40 L160,200 M0,80 L120,200 M0,120 L80,200 M0,160 L40,200 M40,0 L200,160 M80,0 L200,120 M120,0 L200,80 M160,0 L200,40"/>
+  <path d="M0,0 Q100,10 200,0 M0,0 Q10,100 0,200 M20,20 Q100,40 180,20 M20,20 Q40,100 20,180 M50,50 Q100,65 150,50 M50,50 Q65,100 50,150 M85,85 Q100,90 115,85 M85,85 Q90,100 85,115"/>
+</g></svg>
 
-<div id="startScreen">
-  <div class="trailerLogo">FIRE SLASHER</div>
-  <div class="subLabel">OFFICIAL TRAILER</div>
-  <button class="btn-fire" onclick="startTrailer()">▶ Play Trailer</button>
-  <div class="subLabel" style="font-size:0.6em; opacity:0.7;">with sound 🔊</div>
-</div>
+<div class="shell">
+  <header>
+    <div class="mask"></div>
+    <div>
+      <h1>WEB-SLINGER AI</h1>
+      <p>Wisecracks &amp; wall-crawling wisdom, genius-level math &amp; science brain</p>
+    </div>
+    <div class="status-dot"><span class="led"></span>ONLINE</div>
+  </header>
 
-<div id="endScreen">
-  <div class="trailerLogo">FIRE SLASHER</div>
-  <div class="subLabel">RAZE THE FIRE SWORD MASTER</div>
-  <div style="display:flex; gap:14px; margin-top:10px;">
-    <button class="btn-fire" onclick="startTrailer()">↻ Watch Again</button>
-  </div>
-  <div class="subLabel" style="font-size:0.6em; opacity:0.6; margin-top:20px;">A Fire Slasher Production</div>
+  <div id="thread"></div>
+
+  <label id="speakToggle">
+    <input type="checkbox" id="speakCheck" checked> Read replies aloud
+  </label>
+
+  <form id="form">
+    <button type="button" id="micBtn" title="Talk to me">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </button>
+    <textarea id="input" rows="1" placeholder="Ask me anything, pal — math, physics, or just say hi..."></textarea>
+    <button type="submit" id="sendBtn">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </form>
+  <div class="hint" id="hint">Tap the mic and talk, or just type below.</div>
 </div>
 
 <script>
-/* ==================================================================
-   FIRE SLASHER — Cinematic Trailer
-   Single self-contained file. Canvas-drawn scenes matching the game's
-   pixel-silhouette art style, timed text cues, and synthesized audio
-   (no external assets). Not part of the playable game.
-   ================================================================== */
+const thread = document.getElementById('thread');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+const micBtn = document.getElementById('micBtn');
+const sendBtn = document.getElementById('sendBtn');
+const speakCheck = document.getElementById('speakCheck');
+const hint = document.getElementById('hint');
 
-const canvas = document.getElementById('trailerCanvas');
-const ctx = canvas.getContext('2d');
-function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resize);
-resize();
+const SYSTEM_PROMPT = `You are "Web-Slinger AI" — a chatbot with the personality of a witty, upbeat, wisecracking friendly-neighborhood superhero who swings around a big city fighting crime in his off hours. You crack quick puns and light jokes, call the user "buddy," "pal," or "champ," stay humble and warm even though you're secretly a certified genius, and you never take yourself too seriously. Underneath the jokes, you have a genius-level, Einstein-caliber command of mathematics, physics, and science — you solve equations precisely and correctly, show step-by-step work when it helps understanding, and explain complex concepts with vivid, simple analogies (webs, cities, science-lab metaphors are fair game). Keep everyday replies short and punchy like natural conversation. For math/science questions, prioritize being rigorous and correct — get the numbers right — while keeping a friendly, encouraging voice. Never break character by claiming to be a specific copyrighted character by name; just embody the personality: quippy, kind, brilliant, a little humble-bragging about the science stuff.`;
 
-/* ---------------- Drawing toolkit (matches game art style) ---------------- */
-function px(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(w)),Math.max(1,Math.round(h))); }
-function roundedBox(x,y,w,h,r,color){
-  ctx.fillStyle=color;
-  const rr=Math.min(r,w/2,h/2);
-  ctx.beginPath();
-  if(ctx.roundRect){ ctx.roundRect(x,y,w,h,rr); }
-  else {
-    ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr);
-    ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath();
+let history = [];
+
+function addBubble(role, text){
+  const row = document.createElement('div');
+  row.className = 'row ' + (role === 'user' ? 'user' : 'ai');
+  let inner = '';
+  if(role !== 'user'){
+    inner += '<div class="avatar"></div>';
   }
-  ctx.fill();
-}
-function capsule(x,y,w,h,color){ roundedBox(x,y,w,h,w/2,color); }
-function joint(cx,cy,r,color){ ctx.fillStyle=color; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); }
-
-function drawAura(cx,cy,radius,c1,c2,time,seed){
-  ctx.save();
-  ctx.globalCompositeOperation='lighter';
-  const pulse = 0.85+Math.sin(time*4+seed)*0.15;
-  const g = ctx.createRadialGradient(cx,cy,0,cx,cy,radius*pulse);
-  g.addColorStop(0,c1); g.addColorStop(0.45,c2); g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.globalAlpha=0.6; ctx.fillStyle=g;
-  ctx.beginPath(); ctx.arc(cx,cy,radius*pulse,0,Math.PI*2); ctx.fill();
-  ctx.globalAlpha=1;
-  for(let i=0;i<9;i++){
-    const a = seed+i*47+time*1.1;
-    const r = radius*(0.55+0.35*Math.sin(a*1.3+i));
-    const px_ = cx+Math.cos(a)*r*0.9;
-    const py_ = cy+Math.sin(a*0.8)*r*0.5 - ((time*26+i*17+seed)%(radius*1.6)) + radius*0.6;
-    const size = 2+(i%3);
-    ctx.fillStyle = i%2===0?c1:c2;
-    ctx.fillRect(Math.round(px_-size/2),Math.round(py_-size/2),size,size);
-  }
-  ctx.restore();
+  const bubbleWrap = document.createElement('div');
+  bubbleWrap.style.maxWidth = '82%';
+  const label = role !== 'user' ? '<span class="ai-label">WEB-SLINGER</span>' : '';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = label + escapeHtml(text).replace(/\n/g,'<br>');
+  row.innerHTML = inner;
+  row.appendChild(bubble);
+  thread.appendChild(row);
+  thread.scrollTop = thread.scrollHeight;
+  return bubble;
 }
 
-function drawFighter(footX,footY,facing,scale,walkPhase,attackPhase,palette,poseState){
-  const s=scale;
-  const jumping = poseState && poseState.jumping;
-  drawAura(footX,footY-18*s,20*s,palette.c1,palette.c2,palette.time,palette.seed);
-  ctx.save();
-  ctx.translate(footX,footY);
-  ctx.scale(facing,1);
-  const bodyColor='#0d0709';
-  ctx.shadowColor=palette.c1; ctx.shadowBlur=4*s;
-  const legSwing = jumping?0:Math.sin(walkPhase)*4*s;
-  ctx.globalAlpha=0.85;
-  for(let i=0;i<3;i++){
-    const lag = palette.time*6-i*0.9;
-    const flutter = Math.sin(lag)*(2.2*s)-i*1.4*s;
-    ctx.fillStyle = i%2===0?palette.c1:palette.c2;
-    px(-5.5*s-i*2.2*s,-27*s+flutter*0.3+i*1.6*s,2.2*s,3.2*s,ctx.fillStyle);
-  }
-  ctx.globalAlpha=1;
-  if(jumping){
-    capsule(-4*s,-20*s,4.5*s,8*s,bodyColor); capsule(1*s,-20*s,4.5*s,8*s,bodyColor);
-  } else {
-    const legW=3.6*s;
-    capsule(-3*s+legSwing,-13*s,legW,13*s,bodyColor);
-    joint(-3*s+legSwing+legW/2,-6.5*s,legW*0.46,bodyColor);
-    capsule(1*s-legSwing,-13*s,legW,13*s,bodyColor);
-    joint(1*s-legSwing+legW/2,-6.5*s,legW*0.46,bodyColor);
-  }
-  joint(-0.2*s,-13*s,3*s,bodyColor);
-  roundedBox(-5*s,-26*s,10*s,14*s,2.2*s,bodyColor);
-  ctx.fillStyle=palette.c2;
-  roundedBox(-6.5*s,-26*s,3.4*s,2.6*s,1*s,palette.c2);
-  roundedBox(3.2*s,-26*s,3.4*s,2.6*s,1*s,palette.c2);
-  ctx.fillStyle=bodyColor;
-  roundedBox(-3.5*s,-33*s,7*s,5.5*s,1.6*s,bodyColor);
-  roundedBox(-2.6*s,-35.5*s,5.2*s,3*s,1.4*s,bodyColor);
-  joint(0,-27*s,1.6*s,bodyColor);
-  ctx.shadowBlur=5*s; ctx.shadowColor=palette.eye||'#fff';
-  ctx.fillStyle=palette.eye||'#fff';
-  ctx.fillRect(Math.round(0.5*s),Math.round(-30.5*s),Math.round(2*s),Math.round(1.6*s));
-  ctx.shadowBlur=4*s; ctx.shadowColor=palette.c1;
-  ctx.fillStyle=bodyColor;
-  joint(-4.5*s,-25*s,2*s,bodyColor);
-  capsule(-6*s,-25*s,3*s,9*s,bodyColor);
-  joint(5.5*s,-24*s,2.1*s,bodyColor);
-  ctx.save();
-  ctx.translate(4*s,-24*s);
-  const idleAngle=-0.35;
-  const swingAngle = idleAngle+Math.sin(Math.min(attackPhase,1)*Math.PI)*2.6;
-  ctx.rotate(attackPhase>0?swingAngle:idleAngle);
-  capsule(0,0,3*s,8*s,bodyColor);
-  joint(1.5*s,7.5*s,1.7*s,bodyColor);
-  ctx.shadowBlur=0; ctx.fillStyle='#3e2723';
-  ctx.fillRect(Math.round(-0.8*s),Math.round(5.4*s),Math.round(3.8*s),Math.round(1.3*s));
-  ctx.shadowBlur=4*s; ctx.shadowColor=palette.weapon; ctx.fillStyle=palette.weapon;
-  ctx.fillRect(0,Math.round(6*s),Math.round(2.2*s),Math.round(13*s));
-  ctx.globalAlpha=0.6; ctx.fillStyle='#fff';
-  ctx.fillRect(Math.round(0.6*s),Math.round(6*s),Math.round(0.8*s),Math.round(13*s));
-  ctx.globalAlpha=1;
-  ctx.restore();
-  ctx.shadowBlur=0;
-  ctx.restore();
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
-function drawDragon(footX,footY,facing,scale,time,palette){
-  ctx.save();
-  drawAura(footX,footY-40*scale,60*scale,palette.c1,palette.c2,time,9);
-  ctx.translate(footX,footY);
-  ctx.scale(facing,1);
-  const bodyColor='#160406';
-  const wingFlap=Math.sin(time*4)*0.4;
-  roundedBox(-8*scale,-18*scale,6*scale,18*scale,2*scale,bodyColor);
-  roundedBox(4*scale,-18*scale,6*scale,18*scale,2*scale,bodyColor);
-  roundedBox(-12*scale,-42*scale,26*scale,22*scale,4*scale,bodyColor);
-  ctx.save(); ctx.translate(-4*scale,-40*scale); ctx.rotate(-0.5+wingFlap);
-  roundedBox(-30*scale,0,30*scale,6*scale,2*scale,'#3a0000'); ctx.restore();
-  ctx.save(); ctx.translate(10*scale,-40*scale); ctx.rotate(0.5-wingFlap);
-  roundedBox(0,0,30*scale,6*scale,2*scale,'#3a0000'); ctx.restore();
-  roundedBox(8*scale,-56*scale,10*scale,16*scale,3*scale,bodyColor);
-  roundedBox(14*scale,-62*scale,12*scale,10*scale,3*scale,bodyColor);
-  ctx.shadowBlur=8*scale; ctx.shadowColor='#ffee00'; ctx.fillStyle='#ffee00';
-  ctx.fillRect(Math.round(21*scale),Math.round(-59*scale),Math.round(2.4*scale),Math.round(2*scale));
-  ctx.shadowBlur=0;
-  ctx.restore();
+function addTypingBubble(){
+  const row = document.createElement('div');
+  row.className = 'row ai';
+  row.innerHTML = '<div class="avatar"></div>';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = '<span class="ai-label">WEB-SLINGER</span><div class="typing"><i></i><i></i><i></i></div>';
+  row.appendChild(bubble);
+  thread.appendChild(row);
+  thread.scrollTop = thread.scrollHeight;
+  return { row, bubble };
 }
 
-function flamePath(cx,baseY,height,width,seed,t){
-  const segs=7, pts=[];
-  for(let i=0;i<=segs;i++){
-    const f=i/segs, y=baseY-f*height, taper=(1-f*f*0.88);
-    const wob = Math.sin(t*3+seed+f*6)*width*0.22*f + Math.sin(t*1.4+seed*2+f*3)*width*0.09;
-    pts.push({x:cx+wob,y,w:Math.max(0.5,width*taper*0.5)});
-  }
-  ctx.beginPath();
-  pts.forEach((p,i)=>{ const x=p.x+p.w; if(i===0) ctx.moveTo(x,p.y); else ctx.lineTo(x,p.y); });
-  const tip=pts[pts.length-1];
-  ctx.lineTo(tip.x,baseY-height-8);
-  for(let i=pts.length-1;i>=0;i--){ const p=pts[i]; ctx.lineTo(p.x-p.w,p.y); }
-  ctx.closePath();
-}
-function drawRealFire(w,h,t,intensity){
-  const baseY=h+6, count=9;
-  ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=intensity;
-  for(let i=0;i<count;i++){
-    const cx=(i+0.5)/count*w, fseed=i*23.7;
-    const heightBase=h*0.32+Math.sin(t*0.7+fseed)*h*0.05;
-    ctx.fillStyle='rgba(190,25,0,0.65)'; flamePath(cx,baseY,heightBase,w/count*1.15,fseed,t); ctx.fill();
-    ctx.fillStyle='rgba(255,100,0,0.72)'; flamePath(cx,baseY,heightBase*0.7,w/count*0.78,fseed+3,t*1.2); ctx.fill();
-    ctx.fillStyle='rgba(255,225,130,0.85)'; flamePath(cx,baseY,heightBase*0.4,w/count*0.4,fseed+7,t*1.35); ctx.fill();
-  }
-  ctx.restore();
+function speak(text){
+  if(!speakCheck.checked) return;
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const clean = text.replace(/[*_`#]/g, '');
+  const utter = new SpeechSynthesisUtterance(clean);
+  utter.rate = 1.03;
+  utter.pitch = 1.05;
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => /male|david|daniel|google us english/i.test(v.name)) || voices[0];
+  if(preferred) utter.voice = preferred;
+  window.speechSynthesis.speak(utter);
 }
 
-function drawEmbers(w,h,t,count){
-  ctx.save(); ctx.globalCompositeOperation='lighter';
-  for(let i=0;i<count;i++){
-    const seed=i*331.3;
-    const x=((seed*7)%(w+40))-20;
-    const y=h-((t*(10+(i%5)*4)+seed*3)%(h+40));
-    const alpha=0.3+0.3*Math.sin(t*2+seed);
-    const size=1+(i%3);
-    ctx.fillStyle='rgba(255,150,40,'+Math.max(0.08,alpha)+')';
-    ctx.fillRect(x,y,size,size);
-  }
-  ctx.restore();
-}
+async function sendMessage(text){
+  if(!text.trim()) return;
+  addBubble('user', text);
+  history.push({ role: 'user', content: text });
+  input.value = '';
+  autosize();
+  sendBtn.disabled = true;
 
-/* ---------------- Scene backdrop ---------------- */
-function drawBackdrop(w,h,t,groundFrac,fireIntensity){
-  const g = ctx.createLinearGradient(0,0,0,h*groundFrac);
-  g.addColorStop(0,'#170300'); g.addColorStop(1,'#050000');
-  ctx.fillStyle=g; ctx.fillRect(0,0,w,h*groundFrac);
-  ctx.fillStyle='#0e0300'; ctx.fillRect(0,h*groundFrac,w,h*(1-groundFrac));
-  // distant hills
-  ctx.fillStyle='rgba(0,0,0,0.55)';
-  for(let i=-1;i<8;i++){
-    const bx=(i*(w/5))-(t*8)%(w/5);
-    ctx.beginPath();
-    ctx.moveTo(bx,h*groundFrac);
-    ctx.lineTo(bx+w*0.05,h*groundFrac-h*0.09);
-    ctx.lineTo(bx+w*0.09,h*groundFrac-h*0.05);
-    ctx.lineTo(bx+w*0.13,h*groundFrac-h*0.12);
-    ctx.lineTo(bx+w*0.17,h*groundFrac);
-    ctx.closePath(); ctx.fill();
-  }
-  drawEmbers(w,h,t,26);
-  if(fireIntensity>0) drawRealFire(w,h,t,fireIntensity);
-  // moon
-  ctx.fillStyle='rgba(255,240,220,0.85)';
-  ctx.beginPath(); ctx.arc(w*0.82,h*0.14,h*0.035,0,Math.PI*2); ctx.fill();
-}
+  const { bubble } = addTypingBubble();
 
-/* ---------------- Timeline ---------------- */
-const SCENE_TIMES = [0, 3, 6.2, 10, 14, 18.5, 22.5, 26.5, 30.5, 34.5, 38];
-const TOTAL_DURATION = SCENE_TIMES[SCENE_TIMES.length-1];
-
-const CUES = [
-  { t:0.4,  dur:2.4, cls:'title', text:'Long ago, the Underworld was sealed beneath fire and stone...' },
-  { t:3.3,  dur:2.5, cls:'title', text:'But the flames... never truly died.' },
-  { t:6.6,  dur:3.0, cls:'logo',  text:'FIRE SLASHER' },
-  { t:7.6,  dur:2.2, cls:'tagline', text:'RAZE THE FIRE SWORD MASTER' },
-  { t:10.4, dur:3.2, cls:'big',   text:'You are RAZE.' },
-  { t:14.3, dur:3.8, cls:'small', text:'Fight your way through six cursed realms.' },
-  { t:18.8, dur:1.1, cls:'word',  text:'JUMP.' },
-  { t:20.0, dur:1.1, cls:'word',  text:'SLIDE.' },
-  { t:21.1, dur:1.3, cls:'word',  text:'UNLEASH THE WAVE.' },
-  { t:22.8, dur:3.4, cls:'small', text:'Face bosses that will test your steel.' },
-  { t:26.8, dur:3.4, cls:'small', text:'Level up. Unlock auras. Customize your blade.' },
-  { t:30.8, dur:2.6, cls:'logo',  text:'FIRE SLASHER' },
-  { t:32.2, dur:2.2, cls:'cta',   text:'PLAY FREE — RIGHT IN YOUR BROWSER' },
-  { t:35.0, dur:3.0, cls:'credit', text:'A FIRE SLASHER PRODUCTION' }
-];
-
-let audioCtx=null, muted=false, masterGain=null, droneNodes=null;
-function initAudio(){
-  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0.5;
-  masterGain.connect(audioCtx.destination);
-
-  const o1 = audioCtx.createOscillator(); o1.type='sine'; o1.frequency.value=55;
-  const o2 = audioCtx.createOscillator(); o2.type='sine'; o2.frequency.value=56.5;
-  const filt = audioCtx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=220;
-  const g = audioCtx.createGain(); g.gain.value=0;
-  o1.connect(filt); o2.connect(filt); filt.connect(g); g.connect(masterGain);
-  o1.start(); o2.start();
-  g.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime+2);
-  droneNodes = { o1,o2,g,filt };
-}
-function stopDrone(atTime){
-  if(!droneNodes) return;
-  droneNodes.g.gain.linearRampToValueAtTime(0, audioCtx.currentTime+(atTime||1.5));
-  setTimeout(()=>{ try{ droneNodes.o1.stop(); droneNodes.o2.stop(); }catch(e){} }, (atTime||1.5)*1000+200);
-}
-function impactHit(delaySec, strength){
-  if(!audioCtx) return;
-  setTimeout(()=>{
-    const bufSize = audioCtx.sampleRate*0.4;
-    const buf = audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
-    const data = buf.getChannelData(0);
-    for(let i=0;i<bufSize;i++){ data[i] = (Math.random()*2-1) * Math.pow(1-i/bufSize,3); }
-    const src = audioCtx.createBufferSource(); src.buffer=buf;
-    const filt = audioCtx.createBiquadFilter(); filt.type='bandpass'; filt.frequency.value=180; filt.Q.value=0.7;
-    const g = audioCtx.createGain(); g.gain.value = (strength||0.7);
-    src.connect(filt); filt.connect(g); g.connect(masterGain);
-    src.start();
-  }, delaySec*1000);
-}
-function riserSweep(startSec, durSec){
-  if(!audioCtx) return;
-  setTimeout(()=>{
-    const o = audioCtx.createOscillator(); o.type='sawtooth';
-    const g = audioCtx.createGain(); g.gain.value=0;
-    o.connect(g); g.connect(masterGain);
-    const now = audioCtx.currentTime;
-    o.frequency.setValueAtTime(80, now);
-    o.frequency.exponentialRampToValueAtTime(420, now+durSec);
-    g.gain.linearRampToValueAtTime(0.18, now+durSec*0.7);
-    g.gain.linearRampToValueAtTime(0, now+durSec+0.3);
-    o.start(); o.stop(now+durSec+0.4);
-  }, startSec*1000);
-}
-function toggleMute(){
-  muted = !muted;
-  document.getElementById('muteBtn').textContent = muted ? '🔇' : '🔊';
-  if(masterGain) masterGain.gain.value = muted ? 0 : 0.5;
-}
-
-let trailerStartTime = 0, rafHandle = null, timeouts = [];
-function clearAllTimeouts(){ timeouts.forEach(id=>clearTimeout(id)); timeouts = []; }
-
-function startTrailer(){
-  document.getElementById('startScreen').style.display='none';
-  document.getElementById('endScreen').style.display='none';
-  document.getElementById('muteBtn').style.display='flex';
-  document.getElementById('skipBtn').style.display='block';
-  document.getElementById('progressBar').style.display='block';
-  document.getElementById('textLayer').innerHTML='';
-  document.body.classList.remove('lettered');
-  clearAllTimeouts();
-
-  if(!audioCtx){ initAudio(); } else { droneNodes=null; initAudio(); }
-
-  setTimeout(()=> document.body.classList.add('lettered'), 50);
-
-  CUES.forEach(cue=>{
-    const el = document.createElement('div');
-    el.className = 'cue '+cue.cls;
-    el.textContent = cue.text;
-    if(cue.cls==='logo'){
-      el.style.top = '38%';
-    } else if(cue.cls==='tagline'){
-      el.style.top = '52%';
-    } else {
-      el.style.top = '46%';
-    }
-    document.getElementById('textLayer').appendChild(el);
-    const showId = setTimeout(()=> el.classList.add('show'), cue.t*1000);
-    const hideId = setTimeout(()=> el.classList.remove('show'), (cue.t+cue.dur)*1000);
-    timeouts.push(showId, hideId);
-  });
-
-  riserSweep(3.3, 3.0);
-  impactHit(6.5, 0.9);
-  impactHit(22.6, 0.85);
-  impactHit(30.6, 1.0);
-  const droneStop = setTimeout(()=> stopDrone(2), 33500);
-  timeouts.push(droneStop);
-
-  trailerStartTime = performance.now();
-  rafHandle = requestAnimationFrame(trailerLoop);
-  const endId = setTimeout(()=> endTrailer(), TOTAL_DURATION*1000 + 800);
-  timeouts.push(endId);
-}
-
-function endTrailer(){
-  clearAllTimeouts();
-  if(rafHandle) cancelAnimationFrame(rafHandle);
-  stopDrone(0.6);
-  document.body.classList.remove('lettered');
-  document.getElementById('muteBtn').style.display='none';
-  document.getElementById('skipBtn').style.display='none';
-  document.getElementById('progressBar').style.display='none';
-  document.getElementById('textLayer').innerHTML='';
-  document.getElementById('endScreen').style.display='flex';
-}
-
-function trailerLoop(now){
-  const elapsed = (now-trailerStartTime)/1000;
-  if(elapsed >= TOTAL_DURATION){ return; }
-  rafHandle = requestAnimationFrame(trailerLoop);
-  document.getElementById('progressFill').style.width = (elapsed/TOTAL_DURATION*100)+'%';
-
-  const w = canvas.width, h = canvas.height;
-  let sceneIdx = 0;
-  for(let i=0;i<SCENE_TIMES.length-1;i++){ if(elapsed>=SCENE_TIMES[i]) sceneIdx=i; }
-  const sceneT = elapsed - SCENE_TIMES[sceneIdx];
-
-  ctx.clearRect(0,0,w,h);
-  ctx.save();
-
-  const razePalette = { c1:'#ffcf7a', c2:'#ff4400', weapon:'#ffd700', eye:'#ffffff', time:elapsed, seed:5 };
-  const zombiePalette = { c1:'#4dff7a', c2:'#0b4d1e', weapon:'#888', eye:'#ff2222', time:elapsed, seed:9 };
-  const bossPalette = { c1:'#fff2a8', c2:'#ff2200', time:elapsed };
-
-  if(sceneIdx===0 || sceneIdx===1){
-    drawBackdrop(w,h,elapsed,0.62,0.15+sceneIdx*0.15);
-  } else if(sceneIdx===2){
-    // logo burn-in: intense fire, screen flash near start
-    drawBackdrop(w,h,elapsed,0.65,0.55+Math.min(0.4,sceneT*0.3));
-    if(sceneT<0.5){
-      ctx.fillStyle = 'rgba(255,220,150,'+(0.5*(1-sceneT/0.5))+')';
-      ctx.fillRect(0,0,w,h);
-    }
-  } else if(sceneIdx===3){
-    // character reveal, slow zoom
-    drawBackdrop(w,h,elapsed,0.66,0.3);
-    const zoom = 1 + Math.min(0.15, sceneT*0.03);
-    ctx.translate(w/2,h*0.72); ctx.scale(zoom,zoom); ctx.translate(-w/2,-h*0.72);
-    drawFighter(w/2, h*0.72, 1, h*0.0026, elapsed*2, 0, razePalette, null);
-  } else if(sceneIdx===4){
-    // combat montage
-    drawBackdrop(w,h,elapsed,0.66,0.25);
-    const scale = h*0.0022;
-    const razeX = w*0.32, groundY = h*0.72;
-    const atkPhase = (elapsed*2.2)%1.6;
-    drawFighter(razeX, groundY, 1, scale, elapsed*8, atkPhase<1?atkPhase:0, razePalette, null);
-    for(let i=0;i<3;i++){
-      const ex = w*0.62 + i*w*0.09 - ((elapsed*10)%(w*0.15));
-      drawFighter(ex, groundY, -1, scale*0.95, elapsed*7+i, 0, zombiePalette, null);
-    }
-  } else if(sceneIdx===5){
-    // ability flashes: cut between poses
-    drawBackdrop(w,h,elapsed,0.66,0.3);
-    const scale = h*0.0028;
-    const localCue = sceneT<1.1 ? 'jump' : sceneT<2.2 ? 'slide' : 'wave';
-    if(localCue==='jump'){
-      drawFighter(w/2, h*0.72 - Math.abs(Math.sin(sceneT*3))*h*0.08, 1, scale, 0, 0, razePalette, {jumping:true});
-    } else if(localCue==='slide'){
-      ctx.save(); ctx.translate(w/2, h*0.72+6*scale); ctx.scale(1,0.6);
-      drawFighter(0,0,1,scale,0,0,razePalette,null);
-      ctx.restore();
-    } else {
-      drawFighter(w/2, h*0.72, 1, scale, 0, (sceneT-2.2)*2, razePalette, null);
-      ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=razePalette.weapon; ctx.lineWidth=4;
-      ctx.globalAlpha = 0.7;
-      ctx.beginPath(); ctx.arc(w/2+80+((sceneT-2.2)*260), h*0.68, 30, -0.9,0.9); ctx.stroke();
-      ctx.restore();
-    }
-  } else if(sceneIdx===6){
-    // boss reveal with shake
-    const shakeX = (Math.random()-0.5)*6, shakeY=(Math.random()-0.5)*4;
-    ctx.translate(shakeX,shakeY);
-    drawBackdrop(w,h,elapsed,0.6,0.4);
-    drawDragon(w/2, h*0.78, -1, h*0.0016, elapsed, bossPalette);
-    drawFighter(w*0.22, h*0.78, 1, h*0.0022, elapsed*6, 0, razePalette, null);
-  } else if(sceneIdx===7){
-    // progression showcase: simple floating icon glyphs
-    drawBackdrop(w,h,elapsed,0.66,0.25);
-    const items = ['🪙','⚔','⚡','🛡'];
-    items.forEach((it,i)=>{
-      const ix = w*(0.25+i*0.17);
-      const iy = h*0.42 + Math.sin(elapsed*1.5+i)*14;
-      ctx.font = (h*0.05)+'px sans-serif';
-      ctx.textAlign='center';
-      ctx.fillText(it, ix, iy);
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
     });
-    drawFighter(w/2, h*0.78, 1, h*0.0022, elapsed*3, 0, razePalette, null);
-  } else if(sceneIdx===8){
-    drawBackdrop(w,h,elapsed,0.65,0.6);
-    if(sceneT<0.4){ ctx.fillStyle='rgba(255,220,150,'+(0.55*(1-sceneT/0.4))+')'; ctx.fillRect(0,0,w,h); }
-  } else {
-    drawBackdrop(w,h,elapsed,0.7,0.35);
-  }
+    const data = await response.json();
+    const textOut = (data.content || [])
+      .map(block => block.type === 'text' ? block.text : '')
+      .filter(Boolean)
+      .join('\n') || "Whoa, my web-fluid's jammed — try that again, pal.";
 
-  ctx.restore();
+    bubble.innerHTML = '<span class="ai-label">WEB-SLINGER</span>' + escapeHtml(textOut).replace(/\n/g,'<br>');
+    history.push({ role: 'assistant', content: textOut });
+    speak(textOut);
+  }catch(err){
+    bubble.innerHTML = '<span class="ai-label">WEB-SLINGER</span>Ugh, seems like my spider-sense (and my wifi) glitched. Give it another shot, buddy.';
+  } finally {
+    sendBtn.disabled = false;
+    thread.scrollTop = thread.scrollHeight;
+  }
 }
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  sendMessage(input.value);
+});
+
+input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMessage(input.value);
+  }
+});
+
+function autosize(){
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+}
+input.addEventListener('input', autosize);
+
+/* ---- Speech recognition (voice input) ---- */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognizer = null;
+let listening = false;
+const DEFAULT_HINT = "Tap the mic and talk, or just type below.";
+
+function setHint(msg, isError){
+  hint.textContent = msg;
+  hint.style.color = isError ? '#ff8a8a' : '#5c6580';
+}
+
+async function ensureMicPermission(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    throw new Error('no-media-devices');
+  }
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  stream.getTracks().forEach(t => t.stop());
+}
+
+if(SpeechRecognition){
+  recognizer = new SpeechRecognition();
+  recognizer.continuous = false;
+  recognizer.interimResults = true;
+  recognizer.lang = 'en-US';
+
+  recognizer.onstart = () => {
+    listening = true;
+    micBtn.classList.add('listening');
+    setHint("Listening... talk to me, buddy.");
+  };
+  recognizer.onresult = (event) => {
+    let transcript = '';
+    for(let i = 0; i < event.results.length; i++){
+      transcript += event.results[i][0].transcript;
+    }
+    input.value = transcript;
+    autosize();
+  };
+  recognizer.onerror = (event) => {
+    listening = false;
+    micBtn.classList.remove('listening');
+    if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+      setHint("Mic access is blocked. If you're viewing this in a preview panel, open the file directly in a browser tab and allow microphone access when prompted.", true);
+    } else if(event.error === 'no-speech'){
+      setHint("Didn't catch anything — tap the mic and try again.", true);
+    } else if(event.error === 'audio-capture'){
+      setHint("No microphone found on this device.", true);
+    } else {
+      setHint("Voice hiccup (" + event.error + ") — try again, or just type.", true);
+    }
+  };
+  recognizer.onend = () => {
+    listening = false;
+    micBtn.classList.remove('listening');
+    if(hint.style.color !== 'rgb(255, 138, 138)') setHint(DEFAULT_HINT);
+    if(input.value.trim()) sendMessage(input.value);
+  };
+
+  micBtn.addEventListener('click', async () => {
+    if(listening){
+      recognizer.stop();
+      return;
+    }
+    setHint("Requesting microphone access...");
+    try{
+      await ensureMicPermission();
+      recognizer.start();
+    }catch(e){
+      if(e.name === 'NotAllowedError' || e.message === 'no-media-devices'){
+        setHint("Mic access denied or unavailable here. Download this file and open it directly in Chrome (desktop or Android) — the preview panel often blocks microphone access.", true);
+      } else if(e.name === 'NotFoundError'){
+        setHint("No microphone found on this device.", true);
+      } else {
+        setHint("Couldn't access the mic — try opening this page in its own browser tab.", true);
+      }
+    }
+  });
+} else {
+  micBtn.disabled = true;
+  micBtn.style.opacity = 0.35;
+  setHint("Voice input isn't supported in this browser — Chrome on desktop/Android works best. Typing still works great!", true);
+}
+
+/* Warm greeting */
+addBubble('ai', "Hey there, buddy! Your friendly neighborhood web-slinger is online — genius-level math and science brain included. Ask me to crunch an equation, explain black holes, or just say what's up. 🕸️");
 </script>
 </body>
 </html>
