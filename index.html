@@ -161,14 +161,14 @@
     border-top:1px solid var(--line);
     align-items:flex-end;
   }
-  #speakToggle{
+  #speakToggle, #wakeToggle{
     display:flex; align-items:center; gap:6px;
     font-size:11.5px; color:#9aa4bd;
     padding:0 2px 8px;
     cursor:pointer;
     user-select:none;
   }
-  #speakToggle input{ accent-color: var(--red); }
+  #speakToggle input, #wakeToggle input{ accent-color: var(--red); }
 
   textarea{
     flex:1;
@@ -251,6 +251,9 @@
   <label id="speakToggle">
     <input type="checkbox" id="speakCheck" checked> Read replies aloud
   </label>
+  <label id="wakeToggle">
+    <input type="checkbox" id="wakeCheck"> Always listen for "Spiderman AI"
+  </label>
 
   <form id="form">
     <button type="button" id="micBtn" title="Talk to me">
@@ -271,9 +274,10 @@ const input = document.getElementById('input');
 const micBtn = document.getElementById('micBtn');
 const sendBtn = document.getElementById('sendBtn');
 const speakCheck = document.getElementById('speakCheck');
+const wakeCheck = document.getElementById('wakeCheck');
 const hint = document.getElementById('hint');
 
-const SYSTEM_PROMPT = `You are "Web-Slinger AI" — a chatbot with the personality of a witty, upbeat, wisecracking friendly-neighborhood superhero who swings around a big city fighting crime in his off hours. You crack quick puns and light jokes, call the user "buddy," "pal," or "champ," stay humble and warm even though you're secretly a certified genius, and you never take yourself too seriously. Underneath the jokes, you have a genius-level, Einstein-caliber command of mathematics, physics, and science — you solve equations precisely and correctly, show step-by-step work when it helps understanding, and explain complex concepts with vivid, simple analogies (webs, cities, science-lab metaphors are fair game). Keep everyday replies short and punchy like natural conversation. For math/science questions, prioritize being rigorous and correct — get the numbers right — while keeping a friendly, encouraging voice. Never break character by claiming to be a specific copyrighted character by name; just embody the personality: quippy, kind, brilliant, a little humble-bragging about the science stuff.`;
+const SYSTEM_PROMPT = `You are "Web-Slinger AI" — a chatbot with the personality of a witty, upbeat, wisecracking friendly-neighborhood superhero who swings around a big city fighting crime in his off hours. You crack quick puns and light jokes, call the user "buddy," "pal," or "champ," stay humble and warm even though you're secretly a certified genius, and you never take yourself too seriously. Underneath the jokes, you have a genius-level, Einstein-caliber command of knowledge across the board: mathematics and calculations (solve equations precisely and correctly, show step-by-step work when it helps), physics, chemistry, biology, geography, and history. Get facts and numbers right — accuracy always comes before the jokes. Explain complex ideas with vivid, simple analogies (webs, cities, science-lab metaphors are fair game), and keep replies conversational and reasonably concise unless a step-by-step derivation or explanation genuinely needs more room. Never break character by claiming to be a specific copyrighted character by name; just embody the personality: quippy, kind, brilliant, a little humble-bragging about how much you know.`;
 
 let history = [];
 
@@ -316,52 +320,116 @@ function addTypingBubble(){
   return { row, bubble };
 }
 
+let cachedVoices = [];
+function refreshVoices(){ cachedVoices = window.speechSynthesis.getVoices(); }
+if('speechSynthesis' in window){
+  refreshVoices();
+  window.speechSynthesis.onvoiceschanged = refreshVoices;
+}
+
+// Browsers only allow speech synthesis to fire reliably if it's tied to a real
+// user gesture (click/tap). Since our reply comes back after an async network
+// call, the gesture has often "expired" by then. Priming with a near-silent
+// utterance directly inside the click handler keeps the audio channel open.
+let audioUnlocked = false;
+function unlockAudio(){
+  if(audioUnlocked || !('speechSynthesis' in window)) return;
+  try{
+    const primer = new SpeechSynthesisUtterance(' ');
+    primer.volume = 0;
+    window.speechSynthesis.speak(primer);
+    audioUnlocked = true;
+  }catch(e){ /* ignore */ }
+}
+
 function speak(text){
   if(!speakCheck.checked) return;
-  if(!('speechSynthesis' in window)) return;
+  if(!('speechSynthesis' in window)){
+    setHint("This browser doesn't support text-to-speech.", true);
+    return;
+  }
   window.speechSynthesis.cancel();
   const clean = text.replace(/[*_`#]/g, '');
   const utter = new SpeechSynthesisUtterance(clean);
   utter.rate = 1.03;
   utter.pitch = 1.05;
-  const voices = window.speechSynthesis.getVoices();
-  const preferred = voices.find(v => /male|david|daniel|google us english/i.test(v.name)) || voices[0];
+  const preferred = cachedVoices.find(v => /male|david|daniel|google us english/i.test(v.name)) || cachedVoices[0];
   if(preferred) utter.voice = preferred;
+  utter.onerror = (e) => {
+    setHint("Couldn't play voice audio (" + e.error + "). If you're in a preview panel, open this in its own browser tab.", true);
+  };
+  utter.onstart = () => { setHint(DEFAULT_HINT); };
   window.speechSynthesis.speak(utter);
 }
 
-async function sendMessage(text){
-  if(!text.trim()) return;
-  addBubble('user', text);
-  history.push({ role: 'user', content: text });
-  input.value = '';
-  autosize();
-  sendBtn.disabled = true;
-
-  const { bubble } = addTypingBubble();
-
+async function fetchReply(messages, attempt){
+  attempt = attempt || 1;
+  let response, data;
   try{
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
         system: SYSTEM_PROMPT,
-        messages: history
+        messages: messages
       })
     });
-    const data = await response.json();
-    const textOut = (data.content || [])
-      .map(block => block.type === 'text' ? block.text : '')
-      .filter(Boolean)
-      .join('\n') || "Whoa, my web-fluid's jammed — try that again, pal.";
+    data = await response.json();
+  }catch(networkErr){
+    if(attempt < 3){
+      await new Promise(r => setTimeout(r, 500 * attempt));
+      return fetchReply(messages, attempt + 1);
+    }
+    throw networkErr;
+  }
 
+  if(!response.ok){
+    const apiMsg = (data && data.error && data.error.message) ? data.error.message : ('HTTP ' + response.status);
+    if(attempt < 3 && response.status >= 500){
+      await new Promise(r => setTimeout(r, 500 * attempt));
+      return fetchReply(messages, attempt + 1);
+    }
+    throw new Error(apiMsg);
+  }
+
+  const textOut = (data.content || [])
+    .map(block => block.type === 'text' ? block.text : '')
+    .filter(Boolean)
+    .join('\n');
+
+  if(!textOut){
+    if(attempt < 3){
+      await new Promise(r => setTimeout(r, 500 * attempt));
+      return fetchReply(messages, attempt + 1);
+    }
+    throw new Error('No reply came back');
+  }
+
+  return textOut;
+}
+
+async function sendMessage(text){
+  if(!text.trim()) return;
+  addBubble('user', text);
+  input.value = '';
+  autosize();
+  sendBtn.disabled = true;
+
+  const { bubble } = addTypingBubble();
+  const attemptedMessages = [...history, { role: 'user', content: text }];
+
+  try{
+    const textOut = await fetchReply(attemptedMessages);
     bubble.innerHTML = '<span class="ai-label">WEB-SLINGER</span>' + escapeHtml(textOut).replace(/\n/g,'<br>');
-    history.push({ role: 'assistant', content: textOut });
+    // Only commit to permanent history now that both turns succeeded —
+    // this is what keeps the user/assistant alternation valid for next time.
+    history = [...attemptedMessages, { role: 'assistant', content: textOut }];
     speak(textOut);
   }catch(err){
-    bubble.innerHTML = '<span class="ai-label">WEB-SLINGER</span>Ugh, seems like my spider-sense (and my wifi) glitched. Give it another shot, buddy.';
+    bubble.innerHTML = '<span class="ai-label">WEB-SLINGER</span>Can\'t reach my brain right now (' + escapeHtml(err.message || 'unknown error') + '). Mind trying again in a moment, pal?';
+    // history is untouched — nothing corrupted, safe to retry
   } finally {
     sendBtn.disabled = false;
     thread.scrollTop = thread.scrollHeight;
@@ -370,6 +438,7 @@ async function sendMessage(text){
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
+  unlockAudio();
   sendMessage(input.value);
 });
 
@@ -445,6 +514,7 @@ if(SpeechRecognition){
   };
 
   micBtn.addEventListener('click', async () => {
+    unlockAudio();
     if(listening){
       recognizer.stop();
       return;
@@ -468,6 +538,100 @@ if(SpeechRecognition){
   micBtn.style.opacity = 0.35;
   setHint("Voice input isn't supported in this browser — Chrome on desktop/Android works best. Typing still works great!", true);
 }
+
+/* ---- Wake-word mode: say "Spiderman AI" + your question ---- */
+const WAKE_PHRASES = ['spiderman ai', 'spider man ai', 'spider-man ai', 'hey spiderman ai', 'hey spider man ai', 'okay spiderman ai'];
+let wakeRecognizer = null;
+let wakeActive = false;
+
+function extractCommand(transcript){
+  const lower = transcript.toLowerCase();
+  let bestIdx = -1, bestLen = 0;
+  for(const phrase of WAKE_PHRASES){
+    const idx = lower.lastIndexOf(phrase);
+    if(idx !== -1 && phrase.length > bestLen){ bestIdx = idx; bestLen = phrase.length; }
+  }
+  if(bestIdx === -1) return null;
+  return transcript.slice(bestIdx + bestLen).trim().replace(/^[,:.\-]+/, '').trim();
+}
+
+function startWakeListening(){
+  if(!SpeechRecognition){
+    setHint("Voice input isn't supported in this browser.", true);
+    wakeCheck.checked = false;
+    return;
+  }
+  wakeActive = true;
+  wakeRecognizer = new SpeechRecognition();
+  wakeRecognizer.continuous = true;
+  wakeRecognizer.interimResults = false;
+  wakeRecognizer.lang = 'en-US';
+
+  wakeRecognizer.onresult = (event) => {
+    const result = event.results[event.results.length - 1];
+    if(!result.isFinal) return;
+    const command = extractCommand(result[0].transcript);
+    if(command === null) return; // heard speech, but no wake phrase — ignore
+    unlockAudio();
+    if(command.length > 0){
+      sendMessage(command);
+    } else {
+      setHint('Heard "Spiderman AI" — go ahead, ask your question, pal.');
+    }
+  };
+  wakeRecognizer.onerror = (event) => {
+    if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+      setHint("Mic access blocked — can't listen for the wake word here.", true);
+      wakeActive = false;
+      wakeCheck.checked = false;
+    }
+    // 'no-speech' etc. are routine in always-on mode — safe to ignore
+  };
+  wakeRecognizer.onend = () => {
+    if(wakeActive){
+      try{ wakeRecognizer.start(); }catch(e){ /* browser hiccup, will retry on next tick */ }
+    }
+  };
+
+  try{
+    wakeRecognizer.start();
+    setHint('Listening for "Spiderman AI"...');
+    micBtn.disabled = true;
+    micBtn.style.opacity = 0.35;
+  }catch(e){
+    setHint("Couldn't start wake-word listening.", true);
+    wakeActive = false;
+    wakeCheck.checked = false;
+  }
+}
+
+function stopWakeListening(){
+  wakeActive = false;
+  if(wakeRecognizer){
+    wakeRecognizer.onend = null;
+    try{ wakeRecognizer.stop(); }catch(e){}
+    wakeRecognizer = null;
+  }
+  micBtn.disabled = false;
+  micBtn.style.opacity = 1;
+  setHint(DEFAULT_HINT);
+}
+
+wakeCheck.addEventListener('change', async () => {
+  if(wakeCheck.checked){
+    unlockAudio();
+    setHint("Requesting microphone access...");
+    try{
+      await ensureMicPermission();
+      startWakeListening();
+    }catch(e){
+      wakeCheck.checked = false;
+      setHint("Mic access denied or unavailable — can't enable wake-word mode here.", true);
+    }
+  } else {
+    stopWakeListening();
+  }
+});
 
 /* Warm greeting */
 addBubble('ai', "Hey there, buddy! Your friendly neighborhood web-slinger is online — genius-level math and science brain included. Ask me to crunch an equation, explain black holes, or just say what's up. 🕸️");
