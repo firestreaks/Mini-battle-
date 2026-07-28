@@ -114,11 +114,53 @@ ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;requestAnimationFra
 })();
 
 const QA=[
-  {q:["hello","hi","hey","hiya","yo","sup","whats up","howdy","greetings"],a:"Hey there, buddy! Your friendly neighborhood Web-Slinger is swinging in. What do you want to know?"},
-  {q:["how are you","how are you doing","hows it going","you good","you okay"],a:"Feeling swing-tastic, pal! Spider-sense is tingling and the brain's firing on all cylinders. What's up?"},
+  {q:["hello","hi","hey","hiya","yo","sup","whats up","howdy","greetings"],a:[
+    "Hey there, buddy! Just got back from a patrol — what do you want to know?",
+    "Yo, pal! Mid-swing between two buildings right now, but I've always got a sec for you. What's on your mind?",
+    "Hey champ! Web-Slinger's here, still smell like street tacos from lunch. What's up?"
+  ]},
+  {q:["how are you","how are you doing","hows it going","you good","you okay","whats up with you","how you doing"],a:[
+    "Not bad, pal! Took down a guy trying to boost a food truck this morning, grabbed a slice on the way out, and now I'm just swinging between rooftops waiting for the next thing to go sideways. You?",
+    "Living the dream, buddy — chased a purse-snatcher three blocks, lost him near Canal Street, found him again by his own bad luck. Otherwise? Pretty chill day.",
+    "Sore shoulders, full stomach, spider-sense still tingling a little from earlier. Standard Tuesday for a web-slinger, honestly. How about you?",
+    "Can't complain! Talked a guy down off a fire escape standoff with nothing but jokes and a well-timed web-shot. Then got dumplings. Solid day."
+  ]},
   {q:["thank you","thanks","thx","ty","thank u","cheers","appreciate it","appreciated"],a:"Anytime, champ! That's what the neighborhood web-slinger is here for."},
+  {q:["which villain did you fight today","what villain did you fight","did you fight a villain today","who did you fight today","fight any villains","fight anyone today"],a:[
+    "Nobody with a cape today, buddy — just a guy in a Halloween mask trying to rob a bodega with a squirt gun spray-painted silver. Still counts, right?",
+    "Went a few rounds with a wannabe named 'The Ferret' who steals scooters. Not exactly Sinister Six material, but he put up a fight.",
+    "Mostly small-time stuff today — a mugger, a runaway forklift, and one guy who genuinely thought bees in a jar counted as a weapon. New York keeps it weird.",
+    "Quiet on the supervillain front, pal. Just the usual: two muggings, one dog rescue, and a guy trying to jaywalk through wet cement."
+  ]},
+  {q:["what did you eat","what did you eat today","what do you eat","what's your favorite food","whats your favorite food"],a:[
+    "Pizza, obviously — thin crust, extra cheese, eaten upside-down from a streetlight because I can't help myself.",
+    "Hot dog from a cart on 42nd, mustard ended up on the mask again. Worth it every time.",
+    "Bacon, egg and cheese on a roll. New York does breakfast better than anywhere on Earth, pal, fight me.",
+    "Whatever was left in the fridge, if I'm honest — chasing bad guys across rooftops means lunch plans rarely survive contact with reality."
+  ]},
+  {q:["how is it to be a web slinger","what is it like being a web slinger","how is it being a web slinger","what is it like swinging through new york","how is it swinging through new york","how do you like new york","what's new york like for you"],a:[
+    "Best commute in the world, buddy. One second you're level with pigeons, the next the whole skyline opens up around you. Loud, messy, alive — I wouldn't trade it.",
+    "Honestly? Feels like riding the city's heartbeat. Wind in your face, bridges under your feet, and you never know what's around the next rooftop.",
+    "It's a rush every single time. New York's got a personality all its own, and swinging through it up close is the best view nobody else gets to see.",
+    "Tiring, thrilling, occasionally involves pigeons to the face — but it's home, pal. Wouldn't want to protect anywhere else."
+  ]},
+  {q:["how is your day","hows your day","what is your day","whats your day","how was your day","how's your day been"],a:[
+    "Pretty solid, pal — patrol this morning, a close call on a fire escape around noon, and now I'm just decompressing between rooftops. Yours?",
+    "Long one, honestly. Started with a rescue, ended with a rooftop chase, and somewhere in between I found time for lunch. Can't complain.",
+    "Busy but good! New York doesn't really do 'slow days' — always something happening three blocks over."
+  ]},
+  {q:["what up with life","whats up with life","how is life","hows life","how's life treating you"],a:[
+    "Life's swinging along, buddy — literally. Villains to stop, pizza to eat, rooftops to bounce between. No complaints.",
+    "Can't complain, pal. Busy juggling web-slinging and, well, everything else. Life of a friendly neighborhood anything, right?",
+    "Life's good! Bit sore, bit tired, mostly just grateful nobody's tried anything TOO wild today."
+  ]},
+  {q:["what is your plan","whats your plan","what are your plans","what's the plan","any plans today"],a:[
+    "Patrol till it gets dark, grab something to eat, keep an ear out in case trouble starts up again. Standard plan, pal.",
+    "Honestly? Just swing around, keep the neighborhood in one piece, and hope for a quiet night. We'll see how that goes.",
+    "Plan's simple: stop trouble before it gets big, be home before the pizza place closes. Priorities, buddy."
+  ]},
   {q:["goodbye","bye","see you","cya","later","peace out","adios","farewell"],a:"Later, pal! I'll be swinging around if you need me — just holler."},
-  {q:["who are you","what are you","tell me about yourself","what can you do"],a:"I'm your Web-Slinger AI — quick with a quip, quicker with the facts. I cover science, math, history, geography, coding, health, food, animals, space, sports, music, movies, philosophy, economics, language and pretty much everything else. Ask away, and I'll talk it right back to you."},
+  {q:["who are you","what are you","tell me about yourself","what can you do","introduce yourself"],a:"I'm your Web-Slinger AI — quick with a quip, quicker with the facts. I cover science, math, history, geography, coding, health, food, animals, space, sports, music, movies, philosophy, economics, language and pretty much everything else. Ask away, and I'll talk it right back to you."},
   {q:["are you real","are you alive","are you human","are you a robot","are you conscious","are you an ai"],a:"I'm an AI, pal — not human, not conscious like you are. But I'm loaded with knowledge and I'm all yours."},
   {q:["you are amazing","you are great","you are awesome","you are the best","good job","well done"],a:"Aw, shucks, buddy. Just doing my friendly neighborhood duty. Keep the questions coming!"},
   {q:["can you make an image","generate an image","create an image","make a photo","draw something","make art"],a:"I'm strictly text-and-voice, no image-slinging here. But I can write you a vivid description or a prompt for an image tool if that helps!"},
@@ -344,6 +386,7 @@ const QA=[
   {q:["who was isaac newton"],a:"Sir Isaac Newton (1643–1727) — discovered laws of motion, gravity, developed calculus, optics."},
   {q:["who was galileo"],a:"Galileo Galilei (1564–1642) — confirmed heliocentrism, invented improved telescope."},
   {q:["who was thomas jefferson"],a:"Thomas Jefferson (1743–1826) — 3rd US President, primary author of the Declaration of Independence."},
+  {q:["father of history","who is the father of history","who is known as the father of history"],a:"Herodotus (c. 484–425 BC) — ancient Greek writer who earned the title 'Father of History' for The Histories, one of the first works to systematically investigate and record events rather than just recount myth and legend."},
   {q:["who was abraham lincoln"],a:"Abraham Lincoln (1809–1865) — 16th US President. Led Union through Civil War."},
   {q:["what is artificial intelligence","what is ai"],a:"AI = machines simulating human intelligence: learning, reasoning, problem-solving, language."},
   {q:["what is machine learning"],a:"AI subset where systems learn patterns from data rather than explicit programming."},
@@ -370,6 +413,15 @@ const QA=[
   {q:["what is compound interest"],a:"Interest earning interest on previous interest. $1,000 at 10%/year = $17,449 after 30 years. Invest early!"},
   {q:["who is shakespeare"],a:"William Shakespeare (1564–1616) — English playwright, poet. Wrote 37+ plays, 154 sonnets."},
   {q:["who painted the mona lisa"],a:"Leonardo da Vinci, ~1503–1519. Hangs in the Louvre, Paris."},
+  {q:["who is michael jackson","who was michael jackson"],a:"Michael Jackson (1958–2009) — 'King of Pop.' Started as a kid with the Jackson 5 in Gary, Indiana, then went solo and became the best-selling music artist of all time. Known for the moonwalk, the single sequined glove, and albums like Thriller, Bad, and Off the Wall. Died June 25, 2009."},
+  {q:["michael jackson songs","what songs did michael jackson make","michael jackson's songs","famous michael jackson songs"],a:"Some of his biggest: Thriller, Billie Jean, Beat It, Smooth Criminal, Bad, Man in the Mirror, Black or White, Rock with You, Don't Stop 'Til You Get Enough, and Remember the Time. Thriller alone is one of the best-selling albums ever made."},
+  {q:["michael jackson stories","michael jackson facts","michael jackson trivia","tell me about michael jackson"],a:[
+    "He debuted the moonwalk on live TV during Motown 25 in 1983, performing 'Billie Jean' — it stopped the room cold and became instantly iconic.",
+    "Thriller (1982) sold over 66 million copies worldwide, making it the best-selling album of all time. The 14-minute music video basically invented the idea of a short film as a music video.",
+    "He won 8 Grammys in a single night in 1984 — still one of the biggest sweeps in Grammy history.",
+    "He started performing as a kid with his brothers in the Jackson 5, singing lead on hits like 'I Want You Back' before he was even a teenager."
+  ]},
+  {q:["michael jackson albums","what albums did michael jackson release"],a:"Solo studio albums: Got to Be There (1972), Ben (1972), Music & Me (1973), Off the Wall (1979), Thriller (1982), Bad (1987), Dangerous (1991), HIStory (1995), Invincible (2001)."},
   {q:["what killed the dinosaurs"],a:"~66 million years ago: ~10-15 km asteroid hit Yucatan Peninsula. 75% of species went extinct."},
   {q:["how old is the human race","when did humans appear"],a:"Anatomically modern Homo sapiens: ~300,000 years ago in Africa."},
   {q:["what is the hottest planet"],a:"Venus — not Mercury! Thick CO₂ atmosphere creates runaway greenhouse effect. Surface: ~465°C."},
@@ -402,37 +454,94 @@ function spideyify(ans){
   return ans;
 }
 
+function resolveAnswer(e){
+  return Array.isArray(e.a) ? e.a[Math.floor(Math.random()*e.a.length)] : e.a;
+}
+
+function niceNum(r){
+  if (Number.isInteger(r)) return String(r);
+  const rounded = Math.round(r * 1e6) / 1e6;
+  return String(rounded);
+}
+
+function tryMath(q){
+  // "X percent of Y" / "X% of Y"
+  let m = q.match(/([\d.]+)\s*(%|percent)\s*of\s*([\d.]+)/);
+  if(m){
+    const a=parseFloat(m[1]), b=parseFloat(m[3]);
+    return `${a}% of ${b} = ${niceNum((a/100)*b)}`;
+  }
+
+  // "square root of X" / "sqrt X" / "√X" — works for ANY number, not just a fixed list
+  m = q.match(/(?:square root of|sqrt|√)\s*([\d.]+)/);
+  if(m){
+    const n = parseFloat(m[1]);
+    const r = Math.sqrt(n);
+    return `√${niceNum(n)} = ${Number.isInteger(r) ? r : r.toFixed(6)+'...'}`;
+  }
+
+  // "cube root of X"
+  m = q.match(/cube root of\s*([\d.]+)/);
+  if(m){
+    const n = parseFloat(m[1]);
+    const r = Math.cbrt(n);
+    return `∛${niceNum(n)} = ${Number.isInteger(r) ? r : r.toFixed(6)+'...'}`;
+  }
+
+  // "X squared" / "X cubed"
+  m = q.match(/([\d.]+)\s*squared/);
+  if(m){ const n=parseFloat(m[1]); return `${niceNum(n)}² = ${niceNum(n*n)}`; }
+  m = q.match(/([\d.]+)\s*cubed/);
+  if(m){ const n=parseFloat(m[1]); return `${niceNum(n)}³ = ${niceNum(n*n*n)}`; }
+
+  // Word-based arithmetic: "45 divided by 9", "12 times 8", "20 plus 5", "to the power of"
+  let s = ' ' + q + ' ';
+  s = s.replace(/\bto the power of\b/g, '^');
+  s = s.replace(/\bdivided by\b|\bdivide\b/g, '/');
+  s = s.replace(/\btimes\b|\bmultiplied by\b|\bmultiply\b/g, '*');
+  s = s.replace(/\bplus\b|\badded to\b/g, '+');
+  s = s.replace(/\bminus\b|\bsubtracted by\b/g, '-');
+  s = s.replace(/\bwhat is\b|\bcalculate\b|\bsolve\b|\bcompute\b|\bequals\b|\bequal to\b/g, '');
+  s = s.replace(/\^/g, '**');
+  s = s.trim();
+  if (/^[\d\s\+\-\*\/\(\)\.x%]+$/.test(s) && /\d/.test(s) && s.length > 0) {
+    try {
+      const r = Function('"use strict";return(' + s.replace(/x/gi,'*') + ')')();
+      if (!isNaN(r) && isFinite(r)) return s.trim() + ' = ' + niceNum(r);
+    } catch(e) {}
+  }
+  return null;
+}
+
 function getAnswer(raw) {
-  const q = raw.toLowerCase().trim().replace(/[?!.,;]/g,'');
+  const q = raw.toLowerCase().trim().replace(/['’]/g,'').replace(/[?!.,;]/g,'');
   if (!q) return "Ask me something, pal!";
+
+  // Math is computed live, ALWAYS, before touching the stored knowledge base —
+  // this guarantees "45 divided by 9" or "square root of 200" get the exact
+  // right number instead of accidentally matching a similar-looking stored fact.
+  const mathAnswer = tryMath(q);
+  if (mathAnswer) return mathAnswer;
 
   for (const e of QA) {
     for (const k of e.q) {
-      if (q === k) return spideyify(e.a);
-      if (k.length >= 4 && q.includes(k)) return spideyify(e.a);
-      if (q.length >= 4 && k.includes(q)) return spideyify(e.a);
+      if (q === k) return spideyify(resolveAnswer(e));
+      if (k.length >= 4 && q.includes(k)) return spideyify(resolveAnswer(e));
+      if (q.length >= 4 && k.includes(q)) return spideyify(resolveAnswer(e));
     }
   }
 
   const words = q.split(/\s+/).filter(w => w.length > 2);
-  let best = 0, ans = null;
+  let best = 0, ansEntry = null;
   for (const e of QA) {
     for (const k of e.q) {
       const kw = k.split(/\s+/);
       let score = 0;
       for (const w of words) if (kw.includes(w)) score += w.length > 4 ? 2 : 1;
-      if (score > best) { best = score; ans = e.a; }
+      if (score > best) { best = score; ansEntry = e; }
     }
   }
-  if (best >= 3) return spideyify(ans);
-
-  const m = q.replace(/what is|calculate|solve|compute/g,'').trim();
-  if (/^[\d\s\+\-\*\/\^\(\)\.x%]+$/.test(m) && m.length > 0) {
-    try {
-      const r = Function('"use strict";return('+m.replace(/x/gi,'*').replace(/\^/g,'**')+')')();
-      if (!isNaN(r) && isFinite(r)) return m.trim() + ' = ' + r;
-    } catch(e) {}
-  }
+  if (best >= 3) return spideyify(resolveAnswer(ansEntry));
 
   if (q.includes('capital of') || q.includes('capital city')) return "I know most world capitals, buddy! Try: 'What is the capital of [country]?'";
   if (q.includes('how to') || q.includes('how do i') || q.includes('how can i')) return "Good how-to question! Be a bit more specific, pal. Try: 'How do I [specific thing]?'";
