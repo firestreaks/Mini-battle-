@@ -730,18 +730,20 @@ if(SpeechRecognition){
   setHint("Voice input isn't supported in this browser. Typing still works great!", true);
 }
 
-const WAKE_PHRASES = ['spiderman ai','spider man ai','spider-man ai','hey spiderman ai','hey spider man ai','okay spiderman ai'];
 let wakeRecognizer = null, wakeActive = false;
 
+// Speech recognition very often mishears "AI" (spoken as two letters) as "I",
+// "eye", or drops it — so we only require hearing "spiderman"/"spider man"
+// itself, then strip whatever filler word follows it ("ai"/"i"/"eye"/etc.)
+// before treating the rest as the actual question. Much more forgiving.
 function extractCommand(transcript){
-  const lower = transcript.toLowerCase();
-  let bestIdx=-1, bestLen=0;
-  for(const phrase of WAKE_PHRASES){
-    const idx = lower.lastIndexOf(phrase);
-    if(idx!==-1 && phrase.length>bestLen){ bestIdx=idx; bestLen=phrase.length; }
-  }
-  if(bestIdx===-1) return null;
-  return transcript.slice(bestIdx+bestLen).trim().replace(/^[,:.\-]+/,'').trim();
+  const triggerRegex = /spider[\s-]?man/gi;
+  let lastMatch = null, m;
+  while((m = triggerRegex.exec(transcript)) !== null){ lastMatch = m; }
+  if(!lastMatch) return null;
+  let rest = transcript.slice(lastMatch.index + lastMatch[0].length);
+  rest = rest.replace(/^[\s,:.\-]*\b(a\.?\s?i\.?|ai|eye|i)\b[\s,:.\-]*/i, '');
+  return rest.trim().replace(/^[,:.\-]+/, '').trim();
 }
 
 function startWakeListening(){
